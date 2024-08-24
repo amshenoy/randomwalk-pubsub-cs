@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "StockGrpc";
+
+package stock;
+
+service StockService {
+    rpc GetPrice(StockPriceRequest) returns (stream StockPriceResponse);
+}
+
+message StockPriceRequest {
+    string symbol = 1;
+}
+
+message StockPriceResponse {
+    string symbol = 1;
+    double price = 2;
+}
+
