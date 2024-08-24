@@ -6,9 +6,16 @@ namespace StockGrpc.Services;
 
 public class StockService : StockGrpc.StockService.StockServiceBase
 {
-    private readonly StockRepository _repository = StockRepository.Instance;
-    private readonly StockPriceChangedSubject _subject = StockPriceChangedSubject.Instance;
+    private readonly StockRepository _repository;
+    private readonly StockPriceChangedSubject _subject;
 
+    // Constructor injection for dependencies
+    public StockService(StockRepository repository, StockPriceChangedSubject subject)
+    {
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _subject = subject ?? throw new ArgumentNullException(nameof(subject));
+    }
+    
     public override async Task GetPrice(StockPriceRequest request, IServerStreamWriter<StockPriceResponse> responseStream, ServerCallContext context)
     {
         var stock = _repository.GetStock(request.Symbol);

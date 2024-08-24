@@ -3,14 +3,16 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+
 public sealed class StockRepository
 {
-    private static readonly Lazy<StockRepository> _instance = new(() => new StockRepository());
-    public static StockRepository Instance => _instance.Value;
-
     private readonly ConcurrentDictionary<string, Stock> _stocks = new();
 
-    private StockRepository()
+    public StockRepository()
     {
         var random = new Random();
         AddStock(new Stock("GOOGL", random.Next(50, 200)));
@@ -30,7 +32,7 @@ public sealed class StockRepository
         return _stocks.Values.ToList().AsReadOnly();
     }
 
-    public Stock GetStock(string symbol)
+    public Stock? GetStock(string symbol)
     {
         return _stocks.TryGetValue(symbol, out var stock) ? stock : null;
     }
@@ -61,35 +63,47 @@ public class Stock
 
 public class StockPriceChangedEventListener
 {
-    public void HandleEvent(StockPriceChangedEvent eventObj) {
+    private readonly StockPriceChangedSubject _subject;
+
+    public StockPriceChangedEventListener(StockPriceChangedSubject subject)
+    {
+        _subject = subject ?? throw new ArgumentNullException(nameof(subject));
+    }
+
+    public void HandleEvent(StockPriceChangedEvent eventObj)
+    {
         Console.WriteLine(eventObj);
-        StockPriceChangedSubject.Instance.Notify(eventObj);
+        _subject.Notify(eventObj);  // Wait for the async method to complete
     }
 }
 
-public class RandomStockPriceUpdatingTask
-{
-    private readonly StockRepository _repository = StockRepository.Instance;
 
-    public async Task RunAsync()
+public class RandomStockPriceUpdatingService : BackgroundService
+{
+    private readonly StockRepository _repository;
+    private readonly Random _random = new();
+
+    public RandomStockPriceUpdatingService(StockRepository repository)
     {
-        while (true)
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
         {
             UpdateRandomStock();
-            await Task.Delay(100); // Non-blocking delay
+            await Task.Delay(100, stoppingToken);
         }
     }
 
     private void UpdateRandomStock()
     {
-        var random = new Random();
         var stocks = _repository.GetStocks();
-        var randomStock = stocks.Skip(random.Next(stocks.Count)).FirstOrDefault();
-        if (randomStock != null)
-        {
-            var newPrice = randomStock.Price + random.NextDouble() * 10 - 5;
-            randomStock.UpdatePrice(newPrice);
-        }
+        var randomStock = stocks.Skip(_random.Next(stocks.Count)).FirstOrDefault();
+        if (randomStock is null) return;
+        var newPrice = Math.Round(Math.Max(randomStock.Price + _random.NextDouble() * 10 - 5, 5), 2);
+        randomStock.UpdatePrice(newPrice);
     }
 }
 
