@@ -1,5 +1,5 @@
 
-# Grpc Template
+# Random Walk Stock Repository
 
 ### Dotnet VSCode
 
@@ -11,15 +11,15 @@ dotnet new sln
 dotnet new list
 
 # Create new project in subdirectory
-cd MyProject
+cd StockGrpc
 dotnet new grpc
 cd ../
 
 # Add the csproj to sln
-dotnet sln add "./MyProject/MyProject.csproj"
+dotnet sln add "./StockGrpc/StockGrpc.csproj"
 
 # Run the project
-dotnet run --project MyProject
+dotnet run --project StockGrpc
 
 ```
 

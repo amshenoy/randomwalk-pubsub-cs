@@ -5,7 +5,8 @@ option csharp_namespace = "StockGrpc";
 package stock;
 
 service StockService {
-    rpc GetPrice(StockPriceRequest) returns (stream StockPriceResponse);
+    rpc GetPrice(StockPriceRequest) returns (StockPriceResponse);
+    rpc SubscribePrice(StockPriceRequest) returns (stream StockPriceResponse);
 }
 
 message StockPriceRequest {

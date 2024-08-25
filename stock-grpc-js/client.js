@@ -26,7 +26,7 @@ const client = new stockProto.StockService(endpoint, grpc.credentials.createInse
 // });
 
 
-var call = client.GetPrice({ symbol: 'GOOGL' });
+var call = client.SubscribePrice({ symbol: 'GOOGL' });
 
 call.on('data', (response) => {
   console.log('Received price:', response.symbol, '->', response.price);
