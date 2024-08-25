@@ -6,17 +6,11 @@ using StockGrpc;
 
 public class StockPriceChangedSubject
 {
-    private readonly ConcurrentDictionary<string, List<IServerStreamWriter<StockPriceResponse>>> _observers =
-        new ConcurrentDictionary<string, List<IServerStreamWriter<StockPriceResponse>>>();
-
-    // Constructor can be public as the DI container will manage the lifecycle
-    public StockPriceChangedSubject()
-    {
-    }
+    private readonly ConcurrentDictionary<string, List<IServerStreamWriter<StockPriceResponse>>> _observers = new();
 
     public void Register(string symbol, IServerStreamWriter<StockPriceResponse> observer)
     {
-        _observers.AddOrUpdate(symbol, new List<IServerStreamWriter<StockPriceResponse>> { observer },
+        _observers.AddOrUpdate(symbol, [observer],
             (key, existingObservers) =>
             {
                 existingObservers.Add(observer);

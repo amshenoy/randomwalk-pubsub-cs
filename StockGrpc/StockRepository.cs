@@ -70,10 +70,10 @@ public class StockPriceChangedEventListener
         _subject = subject ?? throw new ArgumentNullException(nameof(subject));
     }
 
-    public void HandleEvent(StockPriceChangedEvent eventObj)
+    public async void HandleEvent(StockPriceChangedEvent eventObj)
     {
         Console.WriteLine(eventObj);
-        _subject.Notify(eventObj);  // Wait for the async method to complete
+        await _subject.Notify(eventObj); // To await or not to await? (Latency vs Responsiveness)
     }
 }
 
