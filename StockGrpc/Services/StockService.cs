@@ -78,31 +78,38 @@ public class StockService : StockGrpc.StockService.StockServiceBase
 		clientActiveSymbols[clientId] = activeSymbols;
 
 		// Task for handling incoming requests
+		var token = context.CancellationToken;
 		var requestTask = Task.Run(async () =>
 		{
 			try
 			{
-				await foreach (var request in requestStream.ReadAllAsync())
-				{
-					switch (request.Type)
+				while (!token.IsCancellationRequested)
+                {
+					// ISSUE: ReadAllAsync does not promptly react to cancellation
+					// hence throwing exception instead of safely exiting the loop :-(
+					// https://github.com/dotnet/runtime/issues/56820
+					await foreach (var request in requestStream.ReadAllAsync())
 					{
-						case RequestType.Subscribe:
-							Console.WriteLine($"Client {clientId} subscribed to stock: {request.Symbol}");
-							lock (activeSymbols)
-							{
-								activeSymbols.Add(request.Symbol);
-							}
-							_subject.Register(request.Symbol, responseStream);
-							break;
+						switch (request.Type)
+						{
+							case RequestType.Subscribe:
+								Console.WriteLine($"Client {clientId} subscribed to stock: {request.Symbol}");
+								lock (activeSymbols)
+								{
+									activeSymbols.Add(request.Symbol);
+								}
+								_subject.Register(request.Symbol, responseStream);
+								break;
 
-						case RequestType.Unsubscribe:
-							Console.WriteLine($"Client {clientId} unsubscribed from stock: {request.Symbol}");
-							lock (activeSymbols)
-							{
-								activeSymbols.Remove(request.Symbol);
-							}
-							_subject.Unregister(request.Symbol, responseStream);
-							break;
+							case RequestType.Unsubscribe:
+								Console.WriteLine($"Client {clientId} unsubscribed from stock: {request.Symbol}");
+								lock (activeSymbols)
+								{
+									activeSymbols.Remove(request.Symbol);
+								}
+								_subject.Unregister(request.Symbol, responseStream);
+								break;
+						}
 					}
 				}
 			}
@@ -110,23 +117,13 @@ public class StockService : StockGrpc.StockService.StockServiceBase
 			{
 				// Request Stream is aborted
 				Console.WriteLine($"Request Stream Closed: {ex.Message}");
-
-				// Clean up when the client disconnects
-				clientActiveSymbols.TryRemove(clientId, out _);
 			}
-		}, context.CancellationToken);
+		}, token);
 
-		// Keep connection open
-		// await Task.WhenAll(requestTask, responseTask);
 		try
 		{
 			// Keep the stream open to continue receiving updates
 			await requestTask;
-			// while (!context.CancellationToken.IsCancellationRequested)
-			// {
-			// 	// await Task.Delay(Timeout.Infinite, context.CancellationToken);
-			// 	await Task.WhenAll(requestTask);
-			// }
 		}
 		catch (TaskCanceledException)
 		{
@@ -146,6 +143,7 @@ public class StockService : StockGrpc.StockService.StockServiceBase
 					_subject.Unregister(symbol, responseStream);
 				}
 			}
+			// Clean up when the client disconnects
 			clientActiveSymbols.TryRemove(clientId, out _);
 		}
 	}
