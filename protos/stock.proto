@@ -6,11 +6,23 @@ package stock;
 
 service StockService {
     rpc GetPrice(StockPriceRequest) returns (StockPriceResponse);
-    rpc SubscribePrice(StockPriceRequest) returns (stream StockPriceResponse);
+
+    // Bi-directional streaming for stock price updates
+    rpc PriceStream(stream StockStreamRequest) returns (stream StockPriceResponse);
 }
 
 message StockPriceRequest {
     string symbol = 1;
+}
+
+message StockStreamRequest {
+    string symbol = 1;
+    RequestType type = 2;
+}
+
+enum RequestType {
+    SUBSCRIBE = 0;
+    UNSUBSCRIBE = 1;
 }
 
 message StockPriceResponse {
