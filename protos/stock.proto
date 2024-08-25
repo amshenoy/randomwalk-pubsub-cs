@@ -16,7 +16,7 @@ message StockPriceRequest {
 }
 
 message StockStreamRequest {
-    string symbol = 1;
+    repeated string symbols = 1;
     RequestType type = 2;
 }
 

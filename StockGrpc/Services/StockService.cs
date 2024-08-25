@@ -37,6 +37,8 @@ public class StockService : StockGrpc.StockService.StockServiceBase
 		var clientId = context.GetHttpContext().Connection.Id;
 		clientActiveSymbols[clientId] = [];
 
+		Console.WriteLine($"Client Connected: {clientId}");
+
 		var token = context.CancellationToken;
 		try
 		{
@@ -86,21 +88,25 @@ public class StockService : StockGrpc.StockService.StockServiceBase
 				switch (request.Type)
 				{
 					case RequestType.Subscribe:
-						Console.WriteLine($"Client {clientId} subscribed to stock: {request.Symbol}");
+						Console.WriteLine($"Client {clientId} subscribed to symbols: {string.Join(", ", request.Symbols)}");
 						lock (activeSymbols)
 						{
-							activeSymbols.Add(request.Symbol);
+							activeSymbols.UnionWith(request.Symbols);
 						}
-						_subject.Register(request.Symbol, responseStream);
+						foreach (var symbol in request.Symbols) {
+							_subject.Register(symbol, responseStream);
+						}
 						break;
 
 					case RequestType.Unsubscribe:
-						Console.WriteLine($"Client {clientId} unsubscribed from stock: {request.Symbol}");
+						Console.WriteLine($"Client {clientId} unsubscribed from symbols: {string.Join(", ", request.Symbols)}");
 						lock (activeSymbols)
 						{
-							activeSymbols.Remove(request.Symbol);
+							activeSymbols.ExceptWith(request.Symbols);
 						}
-						_subject.Unregister(request.Symbol, responseStream);
+						foreach (var symbol in request.Symbols) {
+							_subject.Unregister(symbol, responseStream);
+						}
 						break;
 				}
 			}
