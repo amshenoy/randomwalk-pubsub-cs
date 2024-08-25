@@ -3,11 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-
 public sealed class StockRepository
 {
     private readonly ConcurrentDictionary<string, Stock> _stocks = new();
@@ -72,7 +67,7 @@ public class StockPriceChangedEventListener
 
     public async void HandleEvent(StockPriceChangedEvent eventObj)
     {
-        Console.WriteLine(eventObj);
+        // Console.WriteLine(eventObj);
         await _subject.Notify(eventObj); // To await or not to await? (Latency vs Responsiveness)
     }
 }

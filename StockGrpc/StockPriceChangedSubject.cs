@@ -38,7 +38,13 @@ public class StockPriceChangedSubject
             var response = new StockPriceResponse { Symbol = eventObj.Symbol, Price = eventObj.Price };
             foreach (var observer in observers)
             {
-                await observer.WriteAsync(response);
+				try {
+                	await observer.WriteAsync(response);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex.ToString());
+				}
             }
         }
     }
