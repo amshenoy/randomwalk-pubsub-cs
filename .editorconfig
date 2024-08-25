@@ -1,0 +1,10 @@
+root=true
+
+[*]
+indent_style = tab
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+wrap_parameters_style=chop_if_long
+wrap_arguments_style=chop_if_long
