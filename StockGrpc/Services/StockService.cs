@@ -105,7 +105,9 @@ public class StockService : StockGrpc.StockService.StockServiceBase
 				}
 			}
 		}
-		catch (Exception) {}
+		catch (Exception) {
+			Console.WriteLine($"Client Disconnected: {clientId}");
+		}
 	}
 
 }

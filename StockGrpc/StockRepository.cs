@@ -35,18 +35,12 @@ public sealed class StockRepository
 
 public record StockPriceChangedEvent(string Symbol, double Price);
 
-public class Stock
+public class Stock(string symbol, double price)
 {
-    private readonly string _symbol;
-    private double _price;
+    private readonly string _symbol = symbol;
+    private double _price = price;
 
-    public Stock(string symbol, double price)
-    {
-        _symbol = symbol;
-        _price = price;
-    }
-
-    public string Symbol => _symbol;
+	public string Symbol => _symbol;
     public double Price => _price;
 
     public void UpdatePrice(double price)
@@ -56,16 +50,11 @@ public class Stock
     }
 }
 
-public class StockPriceChangedEventListener
+public class StockPriceChangedEventListener(StockPriceChangedSubject subject)
 {
-    private readonly StockPriceChangedSubject _subject;
+    private readonly StockPriceChangedSubject _subject = subject ?? throw new ArgumentNullException(nameof(subject));
 
-    public StockPriceChangedEventListener(StockPriceChangedSubject subject)
-    {
-        _subject = subject ?? throw new ArgumentNullException(nameof(subject));
-    }
-
-    public async void HandleEvent(StockPriceChangedEvent eventObj)
+	public async void HandleEvent(StockPriceChangedEvent eventObj)
     {
         // Console.WriteLine(eventObj);
         await _subject.Notify(eventObj); // To await or not to await? (Latency vs Responsiveness)
@@ -77,6 +66,7 @@ public class RandomStockPriceUpdatingService : BackgroundService
 {
     private readonly StockRepository _repository;
     private readonly Random _random = new();
+	public int UpdateIntervalMilliseconds = 40;
 
     public RandomStockPriceUpdatingService(StockRepository repository)
     {
@@ -88,7 +78,7 @@ public class RandomStockPriceUpdatingService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             UpdateRandomStock();
-            await Task.Delay(100, stoppingToken);
+            await Task.Delay(UpdateIntervalMilliseconds, stoppingToken);
         }
     }
 

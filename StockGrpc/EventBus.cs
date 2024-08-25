@@ -20,9 +20,9 @@ public class EventBus
     public void Post<T>(T eventObj)
     {
         var eventType = eventObj.GetType();
-        if (_handlers.ContainsKey(eventType))
+        if (_handlers.TryGetValue(eventType, out List<Action<object>>? handlers))
         {
-            foreach (var handler in _handlers[eventType])
+            foreach (var handler in handlers)
             {
                 handler(eventObj);
             }
@@ -32,7 +32,7 @@ public class EventBus
 
 public static class DomainEvents
 {
-    private static readonly EventBus eventBus = new EventBus();
+    private static readonly EventBus eventBus = new();
     static DomainEvents() {}
     public static void Publish<T>(T eventObj) => eventBus.Post(eventObj);
     public static void Subscribe<T>(Action<T> eventListener) => eventBus.Register(eventListener);
