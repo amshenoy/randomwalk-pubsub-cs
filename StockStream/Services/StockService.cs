@@ -1,17 +1,19 @@
 using Grpc.Core;
-using StockGrpc;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
+
+using StockGrpc.Components;
 
 namespace StockGrpc.Services;
+
+using StockPriceSubscriptionManager = SubscriptionManager<string, StockPriceChangedEvent, StockPriceResponse>;
 
 public class StockService : StockGrpc.StockService.StockServiceBase
 {
 	private readonly StockRepository _repository;
-	private readonly StockPriceChangedSubject _subject;
+	private readonly StockPriceSubscriptionManager _subject;
 	private readonly ConcurrentDictionary<string, HashSet<string>> clientActiveSymbols = new();
 
-	public StockService(StockRepository repository, StockPriceChangedSubject subject)
+	public StockService(StockRepository repository, StockPriceSubscriptionManager subject)
 	{
 		_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 		_subject = subject ?? throw new ArgumentNullException(nameof(subject));

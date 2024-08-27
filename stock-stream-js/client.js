@@ -17,13 +17,7 @@ const PORT = 5243;
 const endpoint = `localhost:${PORT}`;
 const client = new stockProto.StockService(endpoint, grpc.credentials.createInsecure());
 
-// client.GetPrice({ symbol: 'GOOGL' }, (error, response) => {
-//   if (error) {
-//     console.error('Error:', error);
-//   } else {
-//     console.log('Price response:', response.message);
-//   }
-// });
+// client.GetPrice({ symbol: 'GOOGL' }, (error, response) => error ? null : response.message);
 
 // Create a new stream for the bi-directional PriceStream RPC
 const call = client.PriceStream((error, response) => {

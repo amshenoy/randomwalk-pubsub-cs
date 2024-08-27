@@ -1,8 +1,9 @@
 using Grpc.Core;
 using System.Collections.Concurrent;
-using StockGrpc;
 
-public class SubscriptionManager<Category, Event, Response>
+namespace StockGrpc.Components;
+
+public class SubscriptionManager<Category, Event, Response> where Category : notnull
 {
     // Using ConcurrentDictionary with IServerStreamWriter as key and byte as value (acting like a HashSet)
     private readonly ConcurrentDictionary<Category, ConcurrentDictionary<IServerStreamWriter<Response>, byte>> _observers = new();

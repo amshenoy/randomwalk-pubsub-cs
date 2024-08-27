@@ -1,19 +1,18 @@
 using StockGrpc;
+using StockGrpc.Components;
 using StockGrpc.Services;
 
-using StockPriceSubscriptionManager = SubscriptionManager<string, StockPriceChangedEvent, StockGrpc.StockPriceResponse>;
+using StockPriceSubscriptionManager = StockGrpc.Components.SubscriptionManager<string, StockPriceChangedEvent, StockGrpc.StockPriceResponse>;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<StockRepository>();
 builder.Services.AddHostedService<RandomStockPriceUpdatingService>();
 builder.Services.AddSingleton<StockPriceSubscriptionManager>(
-	provider =>
-    {
-		static string eventCategoryMapper(StockPriceChangedEvent e) => e.Symbol;
-		static StockPriceResponse eventResponseMapper(StockPriceChangedEvent e) => new(){ Symbol = e.Symbol, Price = e.Price };
-		return new(eventCategoryMapper, eventResponseMapper);
-    }
+    _ => new(
+        e => e.Symbol,
+        e => new StockPriceResponse { Symbol = e.Symbol, Price = e.Price }
+    )
 );
 
 builder.Services.AddGrpc();
