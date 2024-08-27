@@ -1,26 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
-// TODO: Make this threadsafe
 public class EventBus
 {
-    private readonly Dictionary<Type, List<Action<object>>> _handlers = [];
+    private readonly ConcurrentDictionary<Type, ConcurrentBag<Action<object>>> _handlers = new();
 
     public void Register<T>(Action<T> handler)
     {
         var eventType = typeof(T);
-        if (!_handlers.ContainsKey(eventType))
-        {
-            _handlers[eventType] = [];
-        }
-
-        _handlers[eventType].Add(x => handler((T)x));
+        var handlers = _handlers.GetOrAdd(eventType, _ => []);
+        handlers.Add(x => handler((T)x));
     }
 
     public void Post<T>(T eventObj)
     {
         var eventType = eventObj.GetType();
-        if (_handlers.TryGetValue(eventType, out List<Action<object>>? handlers))
+        if (_handlers.TryGetValue(eventType, out var handlers))
         {
             foreach (var handler in handlers)
             {
