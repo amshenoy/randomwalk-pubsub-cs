@@ -1,9 +1,11 @@
 using Grpc.Core;
 using System.Collections.Concurrent;
 
-using StockGrpc.Components;
+using StockStream.Components;
+using StockStream.Repositories;
+using StockGrpc;
 
-namespace StockGrpc.Services;
+namespace StockStream.Services;
 
 using StockPriceSubscriptionManager = SubscriptionManager<string, StockPriceChangedEvent, StockPriceResponse>;
 

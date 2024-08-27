@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using StockGrpc.Components;
+using StockStream.Components;
 
-namespace StockGrpc.Repositories;
+namespace StockStream.Repositories;
 
 public sealed class StockRepository
 {

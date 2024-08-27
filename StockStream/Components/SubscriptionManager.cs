@@ -1,7 +1,7 @@
 using Grpc.Core;
 using System.Collections.Concurrent;
 
-namespace StockGrpc.Components;
+namespace StockStream.Components;
 
 public class SubscriptionManager<Category, Event, Response> where Category : notnull
 {

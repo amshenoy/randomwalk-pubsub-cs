@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace StockGrpc.Components;
+namespace StockStream.Components;
 
 public class EventBus
 {

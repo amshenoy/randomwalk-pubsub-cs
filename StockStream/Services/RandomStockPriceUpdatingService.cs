@@ -1,4 +1,6 @@
-namespace StockGrpc.Services;
+using StockStream.Repositories;
+
+namespace StockStream.Services;
 
 public class RandomStockPriceUpdatingService : BackgroundService
 {
