@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace StockStream.Components;
 
-public class EventBus
+public class EventsHandler
 {
 	private readonly ConcurrentDictionary<Type, ConcurrentBag<Action<object>>> _handlers = new();
 
@@ -13,7 +13,7 @@ public class EventBus
 		handlers.Add(x => handler((T)x));
 	}
 
-	public void Post<T>(T eventObj)
+	public void Post<T>(T eventObj) where T : notnull
 	{
 		var eventType = eventObj.GetType();
 		if (_handlers.TryGetValue(eventType, out var handlers))
@@ -28,8 +28,8 @@ public class EventBus
 
 public static class DomainEvents
 {
-	private static readonly EventBus eventBus = new();
+	private static readonly EventsHandler eventsHandler = new();
 	static DomainEvents() { }
-	public static void Publish<T>(T eventObj) => eventBus.Post(eventObj);
-	public static void Subscribe<T>(Action<T> eventListener) => eventBus.Register(eventListener);
+	public static void Publish<T>(T eventObj) where T : notnull => eventsHandler.Post(eventObj);
+	public static void Subscribe<T>(Action<T> eventListener) => eventsHandler.Register(eventListener);
 }

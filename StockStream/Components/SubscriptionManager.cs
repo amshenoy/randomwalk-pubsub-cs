@@ -11,7 +11,7 @@ public class SubscriptionManager<Category, Event, Response> where Category : not
 	private readonly Func<Event, Category> _eventCategoryMapper;
 	private readonly Func<Event, Response> _eventResponseMapper;
 
-	public SubscriptionManager(Func<Event, Category> eventCategoryMapper, Func<Event,Response> eventResponseMapper)
+	public SubscriptionManager(Func<Event, Category> eventCategoryMapper, Func<Event, Response> eventResponseMapper)
 	{
 		_eventCategoryMapper = eventCategoryMapper;
 		_eventResponseMapper = eventResponseMapper;

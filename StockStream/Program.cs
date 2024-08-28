@@ -1,8 +1,9 @@
 using StockGrpc;
-using StockGrpc.Components;
-using StockGrpc.Services;
+using StockStream.Components;
+using StockStream.Repositories;
+using StockStream.Services;
 
-using StockPriceSubscriptionManager = StockGrpc.Components.SubscriptionManager<string, StockPriceChangedEvent, StockGrpc.StockPriceResponse>;
+using StockPriceSubscriptionManager = StockStream.Components.SubscriptionManager<string, StockStream.Repositories.StockPriceChangedEvent, StockGrpc.StockPriceResponse>;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,7 @@ builder.Services.AddGrpc();
 var app = builder.Build();
 
 // app.UseMiddleware<GrpcErrorHandlerMiddleware>();
-app.MapGrpcService<StockGrpc.Services.StockService>();
+app.MapGrpcService<StockStream.Services.StockService>();
 app.MapGet("/", () => """
 Communication with gRPC endpoints must be made through a gRPC client.
 To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909
