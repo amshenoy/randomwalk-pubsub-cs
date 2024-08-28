@@ -30,11 +30,13 @@ const call = client.PriceStream((error, response) => {
 
 // Send a subscription request for a stock symbol
 call.write({ symbols: ['GOOGL'], type: 'SUBSCRIBE' });
+call.write({ symbols: ['AMZN'], type: 'SUBSCRIBE' });
 
 // Optional: Send another request (e.g., to unsubscribe)
 setTimeout(() => {
   call.write({ symbols: ['GOOGL'], type: 'UNSUBSCRIBE' });
   call.write({ symbols: ['MSFT'], type: 'SUBSCRIBE' });
+  call.write({ symbols: ['AAPL'], type: 'SUBSCRIBE' });
 }, 10000); // Adjust the delay as needed
 
 
