@@ -11,15 +11,18 @@ dotnet new sln
 dotnet new list
 
 # Create new project in subdirectory
-cd StockGrpc
+cd StockStream
 dotnet new grpc
 cd ../
 
 # Add the csproj to sln
-dotnet sln add "./StockGrpc/StockGrpc.csproj"
+dotnet sln add "./StockStream/StockStream.csproj"
 
 # Run the project
-dotnet run --project StockGrpc
+dotnet run --project StockStream
+
+# Test the grpc server using a client
+node ./stock-stream-js/client.js
 
 ```
 
