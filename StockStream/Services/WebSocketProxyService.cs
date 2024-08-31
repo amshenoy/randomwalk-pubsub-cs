@@ -1,25 +1,20 @@
-using Grpc.Net.Client;
-using Microsoft.AspNetCore.Http;
 using StockGrpc;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 
-public class WebSocketProxyService
+namespace StockStream.Services;
+
+using StockServiceClient = StockGrpc.StockService.StockServiceClient;
+
+public class WebSocketProxyService(StockServiceClient grpcClient)
 {
     private readonly ConcurrentDictionary<string, WebSocket> _clients = new();
-    private readonly StockService.StockServiceClient _grpcClient;
+    private readonly StockServiceClient _grpcClient = grpcClient;
 
-    public WebSocketProxyService(StockService.StockServiceClient grpcClient)
-    {
-        _grpcClient = grpcClient;
-    }
-
-    public async Task HandleWebSocketAsync(HttpContext context)
+	public async Task HandleWebSocketAsync(HttpContext context)
     {
         if (!context.WebSockets.IsWebSocketRequest)
         {
@@ -42,6 +37,7 @@ public class WebSocketProxyService
         }
     }
 
+	// Need this to convert JSON message to StockStreamRequest
     internal class RequestDto
 	{
 		public string? Type { get; set; }
@@ -51,7 +47,7 @@ public class WebSocketProxyService
 	internal JsonSerializerOptions JsonSerializerOptions = new()
 	{
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-		PropertyNameCaseInsensitive = true, // Optional: Allows case-insensitive property matching
+		PropertyNameCaseInsensitive = true,
 		Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: true) }
 	};
 
@@ -72,8 +68,7 @@ public class WebSocketProxyService
                 while (await responseStream.MoveNext(cancellationToken))
                 {
                     var stockResponse = responseStream.Current;
-					// Console.WriteLine(stockResponse.ToString());
-                    var responseMessage = JsonSerializer.Serialize(stockResponse); // TODO: Use a different deserializer options?
+                    var responseMessage = JsonSerializer.Serialize(stockResponse);
                     var responseBuffer = Encoding.UTF8.GetBytes(responseMessage);
                     await webSocket.SendAsync(
 						new ArraySegment<byte>(responseBuffer),
@@ -89,14 +84,11 @@ public class WebSocketProxyService
             }
         }, cancellationToken);
 
-        // Process incoming WebSocket messages
         while (webSocket.State == WebSocketState.Open)
         {
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
-
             if (result.MessageType == WebSocketMessageType.Close)
             {
-                // Close gRPC stream if WebSocket is closed
                 await call.RequestStream.CompleteAsync();
                 break;
             }
@@ -115,7 +107,6 @@ public class WebSocketProxyService
 				var req = new StockStreamRequest{ Type = type };
 				req.Symbols.AddRange(symbolsList);
 
-				// Console.WriteLine($"Stock Stream Request: {requestJson?.Type} {req}");
 				Console.WriteLine($"Stock Stream Request: {req}");
                 if (req != null)
                 {
@@ -124,7 +115,6 @@ public class WebSocketProxyService
             }
         }
 
-        // Ensure gRPC stream is completed
         await call.RequestStream.CompleteAsync();
         await grpcStreamTask;
     }

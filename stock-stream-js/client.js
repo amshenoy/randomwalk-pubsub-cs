@@ -15,6 +15,8 @@ const stockProto = grpc.loadPackageDefinition(packageDefinition).stock;
 
 const PORT = 5243;
 const endpoint = `localhost:${PORT}`;
+
+// This will not work when SSL is required
 const client = new stockProto.StockService(endpoint, grpc.credentials.createInsecure());
 // const client = new stockProto.StockService(endpoint, grpc.credentials.createSsl());
 

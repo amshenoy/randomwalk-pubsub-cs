@@ -1,5 +1,4 @@
 using Grpc.Net.Client;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using StockGrpc;
 using StockStream.Components;
 using StockStream.Repositories;
@@ -9,14 +8,6 @@ using StockPriceSubscriptionManager = StockStream.Components.SubscriptionManager
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.WebHost.ConfigureKestrel(options =>
-// {
-//     options.ListenLocalhost(5243, listenOptions =>
-//     {
-//         listenOptions.Protocols = HttpProtocols.Http1AndHttp2; // Default setting to support both
-//     });
-// });
-
 builder.Services.AddSingleton<StockRepository>();
 builder.Services.AddHostedService<RandomStockPriceUpdatingService>();
 builder.Services.AddSingleton<StockPriceSubscriptionManager>(
@@ -25,13 +16,13 @@ builder.Services.AddSingleton<StockPriceSubscriptionManager>(
         e => new StockPriceResponse { Symbol = e.Symbol, Price = e.Price }
     )
 );
-builder.Services.AddGrpc().AddJsonTranscoding(o =>
-{
-    o.JsonSettings.WriteIndented = true;
-});
+builder.Services.AddGrpc();
 
 
-
+// WebSocketProxyService needs to use a http client to access the same Grpc service
+// However http clients have to have SSL enabled to use http2
+// This also means that the app must now run with https!
+// This makes it more difficult to setup a node grpc client as done previously
 var handler = new HttpClientHandler
 {
     ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
@@ -77,7 +68,6 @@ app.Map("/ws", async context =>
 	}
 	else
 	{
-		Console.WriteLine("BAD REQUEST");
 		context.Response.StatusCode = StatusCodes.Status400BadRequest;
 	}
 });
