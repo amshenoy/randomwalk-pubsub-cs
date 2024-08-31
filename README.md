@@ -18,6 +18,11 @@ cd ../
 # Add the csproj to sln
 dotnet sln add "./StockStream/StockStream.csproj"
 
+# Add packages to project
+cd StockStream
+dotnet add package Microsoft.AspNetCore.Grpc.JsonTranscoding
+cd ../
+
 # Run the project
 dotnet run --project StockStream
 

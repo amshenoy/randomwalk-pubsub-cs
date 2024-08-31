@@ -16,6 +16,7 @@ const stockProto = grpc.loadPackageDefinition(packageDefinition).stock;
 const PORT = 5243;
 const endpoint = `localhost:${PORT}`;
 const client = new stockProto.StockService(endpoint, grpc.credentials.createInsecure());
+// const client = new stockProto.StockService(endpoint, grpc.credentials.createSsl());
 
 // client.GetPrice({ symbol: 'GOOGL' }, (error, response) => error ? null : response.message);
 
