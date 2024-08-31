@@ -2,6 +2,8 @@ const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+
 // Load the protobuf
 const PROTO_PATH = path.join(__dirname, '..', 'protos', 'stock.proto');
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
@@ -17,8 +19,8 @@ const PORT = 5243;
 const endpoint = `localhost:${PORT}`;
 
 // This will not work when SSL is required
-const client = new stockProto.StockService(endpoint, grpc.credentials.createInsecure());
-// const client = new stockProto.StockService(endpoint, grpc.credentials.createSsl());
+// const client = new stockProto.StockService(endpoint, grpc.credentials.createInsecure());
+const client = new stockProto.StockService(endpoint, grpc.credentials.createSsl());
 
 // client.GetPrice({ symbol: 'GOOGL' }, (error, response) => error ? null : response.message);
 
